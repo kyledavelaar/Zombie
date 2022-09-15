@@ -2,14 +2,22 @@
 
 
 #include "Zombie/Useables/Barricade.h"
+#include "Zombie/Game/ZombieGameMode2.h"
+#include "Zombie/Public/Player/ZombiePlayerCharacter.h"
+
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 
 ABarricade::ABarricade()
 {
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMeshComponent");
 	RootComponent = MeshComp;
+
+	CollisionMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+
 	Cost = 500;
+	AccessZone = 0;
 	ObjectName = "Door";
 	bIsUsed = false;
 }
@@ -31,14 +39,32 @@ void ABarricade::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
 void ABarricade::OnRep_BarricadeUsed()
 {
-	SetActorEnableCollision(false);
+	//SetActorEnableCollision(false);
+	CollisionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (OpenAnimation)
+	{
+		MeshComp->PlayAnimation(OpenAnimation, false);
+		UIMessage = FString();
+	}
 }
 
-void ABarricade::Use(ACharacterBase* Player)
+void ABarricade::Use(AZombiePlayerCharacter* Player)
 {
-	// play animation to move barricade
-	UE_LOG(LogTemp, Warning, TEXT("BARRICADE USE FUNCTION FOR %s"), *GetName());
-	//SetActorEnableCollision(false);
-	bIsUsed = true;
-	OnRep_BarricadeUsed();
+	if (HasAuthority() && !bIsUsed && Player && Player->DecrementPoints(Cost))
+	{
+		// play animation to move barricade
+		UE_LOG(LogTemp, Warning, TEXT("BARRICADE USE FUNCTION FOR %s"), *GetName());
+		//SetActorEnableCollision(false);
+		bIsUsed = true;
+		OnRep_BarricadeUsed();
+		if (AZombieGameMode2* GM = GetWorld()->GetAuthGameMode<AZombieGameMode2>())
+		{
+			GM->NewZoneActive(AccessZone);
+		}
+	}
+}
+
+uint8 ABarricade::GetAccessZone()
+{
+	return AccessZone;
 }

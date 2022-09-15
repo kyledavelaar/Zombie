@@ -19,10 +19,19 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
-		class UStaticMeshComponent* MeshComp;
+		class USkeletalMeshComponent* MeshComp;
+
+	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
+		class UStaticMeshComponent* CollisionMesh;
+
+	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
+		class UAnimationAsset* OpenAnimation;
 
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
 		uint16 Cost;
+
+	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
+		uint8 AccessZone;
 
 	UPROPERTY(ReplicatedUsing = OnRep_BarricadeUsed)
 		bool bIsUsed;
@@ -32,5 +41,8 @@ protected:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Use(class ACharacterBase* Player) override;
+
+public:
+	uint8 GetAccessZone();
+	virtual void Use(class AZombiePlayerCharacter* Player) override;
 };

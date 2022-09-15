@@ -19,4 +19,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+public:
+	void Hit(class AZombiePlayerCharacter* Player);
 };

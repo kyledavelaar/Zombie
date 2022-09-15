@@ -2,19 +2,26 @@
 
 
 #include "Zombie/ZombieCharacter/ZombieBase.h"
+#include "Zombie/Public/Player/ZombiePlayerCharacter.h"
 
-// Sets default values
 AZombieBase::AZombieBase()
 {
 
 
 }
 
-// Called when the game starts or when spawned
 void AZombieBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AZombieBase::Hit(AZombiePlayerCharacter* Player)
+{
+	if (HasAuthority() && Player)
+	{
+		Player->IncrementPoints(100);
+	}
 }
 
 

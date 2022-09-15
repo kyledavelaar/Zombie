@@ -29,5 +29,5 @@ protected:
 
 public:
 	FString GetUIMessage();
-	virtual void Use(class ACharacterBase* Player);
+	virtual void Use(class AZombiePlayerCharacter* Player);
 };

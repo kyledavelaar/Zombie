@@ -4,6 +4,7 @@
 #include "Zombie/Game/ZombieGameMode2.h"
 #include "Zombie/ZombieCharacter/ZombieBase.h"
 #include "Zombie/Game/ZombiePlayerSpawnPoint.h"
+#include "Zombie/Useables/Barricade.h"
 #include "Zombie/Game/ZombieSpawnPoint.h"
 #include "Zombie/Public/Player/ZombiePlayerCharacter.h"
 #include "Zombie/Game/ZombieGameState.h"
@@ -39,8 +40,20 @@ void AZombieGameMode2::BeginPlay()
 	{
 		if (AZombieSpawnPoint* SpawnPoint = Cast<AZombieSpawnPoint>(Actor))
 		{
-			ZombieSpawnPoints.Add(SpawnPoint);
+			if (ABarricade* LinkedBarricade = SpawnPoint->GetLinkedBarricade())
+			{
+				// zombie spawn points that will be used later in the game once player has opened doors to new sections of the map
+				SpawnPoint->SetZone(LinkedBarricade->GetAccessZone());
+				ZombieSpawnPoints.Add(SpawnPoint);
+				UE_LOG(LogTemp, Warning, TEXT("linked zone, %d"), LinkedBarricade->GetAccessZone());
+			}
+			else
+			{
+				// default spawn point not linked to any barricades (i.e. when game starts before any doors openened to other zones)
+				ActiveZombieSpawnPoints.Add(SpawnPoint);
+			}
 		}
+	
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Zombie Spawn Count %d"), ZombieSpawnPoints.Num());
 
@@ -107,8 +120,8 @@ void AZombieGameMode2::SpawnZombie()
 {
 	if (ZombiesRemaining > 0)
 	{
-		int RandomIndex = FMath::RandRange(0, ZombieSpawnPoints.Num() - 1);
-		if (AZombieSpawnPoint* SpawnPoint = ZombieSpawnPoints[RandomIndex])
+		int RandomIndex = FMath::RandRange(0, ActiveZombieSpawnPoints.Num() - 1);
+		if (AZombieSpawnPoint* SpawnPoint = ActiveZombieSpawnPoints[RandomIndex])
 		{
 			FVector Location = SpawnPoint->GetActorLocation();
 			FRotator Rotation = SpawnPoint->GetActorRotation();
@@ -122,5 +135,22 @@ void AZombieGameMode2::SpawnZombie()
 	else
 	{
 		GetWorld()->GetTimerManager().PauseTimer(TZombieSpawnHandle);
+	}
+}
+
+void AZombieGameMode2::NewZoneActive(uint8 ZoneNumber)
+{
+	UE_LOG(LogTemp, Warning, TEXT("NEW ZONE SET, %d"), ZoneNumber);
+
+	for (int16 x = ZombieSpawnPoints.Num() - 1; x >= 0; --x)
+	{
+		AZombieSpawnPoint* ZombieSpawnPoint = ZombieSpawnPoints[x];
+
+		if (ZombieSpawnPoint && ZoneNumber == ZombieSpawnPoint->GetZone() && !ZombieSpawnPoint->IsActive())
+		{
+			ActiveZombieSpawnPoints.Add(ZombieSpawnPoint);
+			ZombieSpawnPoint->Activate();
+			ZombieSpawnPoints.RemoveAt(x);
+		}
 	}
 }

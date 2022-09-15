@@ -22,6 +22,7 @@ protected:
 
 	bool bHasLoadedSpawnPoints;
 	TArray<class AZombiePlayerSpawnPoint*> PlayerSpawnPoints;
+	TArray<class AZombieSpawnPoint*> ActiveZombieSpawnPoints;
 	TArray<class AZombieSpawnPoint*> ZombieSpawnPoints;
 
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
@@ -43,4 +44,7 @@ protected:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	void SetSpawnPoints();
+
+public:
+	void NewZoneActive(uint8 ZoneNumber);
 };

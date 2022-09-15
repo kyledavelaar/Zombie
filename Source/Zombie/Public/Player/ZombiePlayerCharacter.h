@@ -25,6 +25,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 		float InteractionRange;
 
+	UPROPERTY(EditDefaultsOnly) // set to replicate
+		int32 Points; // can't make uint (unsigned int) b/c subtracting in DecrementPoints will never get negative and conditional is checking for negative values
+
 protected:
 	void SetInteractableObject();
 	void Interact();
@@ -33,6 +36,12 @@ protected:
 		void Server_Interact(class AInteractableBase* InteractingObject);
 	bool Server_Interact_Validate(class AInteractableBase* InteractingObject);
 	void Server_Interact_Implementation(class AInteractableBase* InteractingObject);
+
+	virtual void OnFire() override;
+
+public:
+	void IncrementPoints(uint16 Value);
+	bool DecrementPoints(uint16 Value);
 	
 protected:
 	virtual void BeginPlay() override;

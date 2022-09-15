@@ -2,7 +2,7 @@
 
 
 #include "Zombie/Useables/InteractableBase.h"
-#include "Zombie/Public/Player/CharacterBase.h"
+#include "Zombie/Public/Player/ZombiePlayerCharacter.h"
 
 // Sets default values
 AInteractableBase::AInteractableBase()
@@ -23,7 +23,7 @@ FString AInteractableBase::GetUIMessage()
 	return UIMessage;
 }
 
-void AInteractableBase::Use(ACharacterBase* Player)
+void AInteractableBase::Use(AZombiePlayerCharacter* Player)
 {
 }
 

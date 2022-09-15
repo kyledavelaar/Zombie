@@ -2,15 +2,18 @@
 
 
 #include "Player/ZombiePlayerCharacter.h"
+#include "Zombie/ZombieCharacter/ZombieBase.h"
 #include "Zombie/Useables/InteractableBase.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "Camera/CameraComponent.h"
+#include "DrawDebugHelpers.h"
 
 AZombiePlayerCharacter::AZombiePlayerCharacter()
 {
 	Interactable = nullptr;
 	InteractionRange = 250.0f;
+	Points = 500;
 }
 
 void AZombiePlayerCharacter::BeginPlay()
@@ -33,6 +36,7 @@ void AZombiePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 void AZombiePlayerCharacter::SetInteractableObject()
 {
+	// LineTrace 
 	FVector Start = GetFirstPersonCameraComponent()->GetComponentLocation();
 	FVector Rotation = GetFirstPersonCameraComponent()->GetComponentRotation().Vector();
 	FVector End = Start + Rotation * InteractionRange;
@@ -90,5 +94,48 @@ void AZombiePlayerCharacter::Server_Interact_Implementation(AInteractableBase* I
 	if (Distance < InteractionRange + 50.0f)
 	{
 		InteractingObject->Use(this);
+	}
+}
+
+void AZombiePlayerCharacter::OnFire()
+{
+	// line trace setup to hit zombie
+	FVector Start = GetFirstPersonCameraComponent()->GetComponentLocation();
+	FVector Rot = GetFirstPersonCameraComponent()->GetComponentRotation().Vector();
+	FVector End = Start + Rot * 2000.0f;
+	FHitResult HitResult;
+	FCollisionObjectQueryParams CollisionQuery;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	
+	if (GetWorld()->LineTraceSingleByObjectType(OUT HitResult, Start, End, CollisionQuery, CollisionParams))
+	{
+		if (AZombieBase* Zombie = Cast<AZombieBase>(HitResult.GetActor()))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ZOMBIE HIT, %s"), *Zombie->GetName());
+			Zombie->Hit(this);
+		}
+	}
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f, 0, 3.0f);
+
+}
+
+void AZombiePlayerCharacter::IncrementPoints(uint16 Value)
+{
+	Points += Value;
+	UE_LOG(LogTemp, Warning, TEXT("POINTS: %d"), Points);
+}
+
+bool AZombiePlayerCharacter::DecrementPoints(uint16 Value)
+{
+	if ((Points - Value) < 0)
+	{
+		return false;
+	}
+	else
+	{
+		Points -= Value;
+		UE_LOG(LogTemp, Warning, TEXT("POINTS: %d"), Points);
+		return true;
 	}
 }
