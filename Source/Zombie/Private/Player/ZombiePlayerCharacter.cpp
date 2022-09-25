@@ -4,6 +4,7 @@
 #include "Player/ZombiePlayerCharacter.h"
 #include "Zombie/ZombieCharacter/ZombieBase.h"
 #include "Zombie/Useables/InteractableBase.h"
+#include "Zombie/Useables/WeaponBase.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "Camera/CameraComponent.h"
@@ -21,7 +22,7 @@ void AZombiePlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	//FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 
 	GetWorld()->GetTimerManager().SetTimer(TInteractTimerHandle, this, &AZombiePlayerCharacter::SetInteractableObject, 0.2f, true);
 }
@@ -99,25 +100,10 @@ void AZombiePlayerCharacter::Server_Interact_Implementation(AInteractableBase* I
 
 void AZombiePlayerCharacter::OnFire()
 {
-	// line trace setup to hit zombie
-	FVector Start = GetFirstPersonCameraComponent()->GetComponentLocation();
-	FVector Rot = GetFirstPersonCameraComponent()->GetComponentRotation().Vector();
-	FVector End = Start + Rot * 2000.0f;
-	FHitResult HitResult;
-	FCollisionObjectQueryParams CollisionQuery;
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
-	
-	if (GetWorld()->LineTraceSingleByObjectType(OUT HitResult, Start, End, CollisionQuery, CollisionParams))
+	if (CurrentWeapon)
 	{
-		if (AZombieBase* Zombie = Cast<AZombieBase>(HitResult.GetActor()))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ZOMBIE HIT, %s"), *Zombie->GetName());
-			Zombie->Hit(this);
-		}
+		CurrentWeapon->Fire();
 	}
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f, 0, 3.0f);
-
 }
 
 void AZombiePlayerCharacter::IncrementPoints(uint16 Value)

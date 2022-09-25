@@ -10,6 +10,7 @@ AWeaponBase::AWeaponBase()
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMeshComponent");
 
 	WeaponName = "Default";
+	BaseDamage = 100;
 	WeaponMaxAmmo = 255;
 	MagazineMaxAmmo = 30;
 	CurrentTotalAmmo = WeaponMaxAmmo;

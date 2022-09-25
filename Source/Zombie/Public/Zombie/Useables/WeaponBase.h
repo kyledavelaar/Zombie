@@ -33,6 +33,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
 		int32 MagazineMaxAmmo;
 
+	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
+		int32 BaseDamage;
+
 	int32 CurrentTotalAmmo;
 	int32 CurrentMagazineAmmo;
 

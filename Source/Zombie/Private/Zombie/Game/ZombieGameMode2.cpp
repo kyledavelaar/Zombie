@@ -16,6 +16,7 @@
 AZombieGameMode2::AZombieGameMode2()
 {
 	//static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/BlueprintClasses/Player/BP_CharacterBase"));
+
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/BlueprintClasses/Player/BP_ZombiePlayerCharacter"));
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
 
