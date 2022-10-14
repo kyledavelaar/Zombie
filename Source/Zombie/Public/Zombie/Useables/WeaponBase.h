@@ -22,6 +22,9 @@ protected:
 		class UAnimationAsset* FireAnimation;
 
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
+		class UAnimMontage* FPSArmsFireMontage;
+
+	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
 		class UAnimationAsset* ReloadAnimation;
 
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
@@ -43,13 +46,15 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	TArray<FHitResult> PerformLineTrace(class AZombiePlayerCharacter* ShootingPlayer);
+
 public:
 	// virtual void Fire() = 0; is a pure virtual function, no definition required in WeaponBase.cpp file
-	virtual void Fire();
+	virtual TArray<FHitResult> Fire(class AZombiePlayerCharacter* ShootingPlayer);
 	virtual void Reload();
 
 	// first element is CurrentMagazineAmmo, second element is CurrentTotalAmmo
 	TArray<int32> GetCurrentAmmo();
 
-
+	class UAnimMontage* GetFireAnimMontage();
 };

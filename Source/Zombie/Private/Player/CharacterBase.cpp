@@ -12,6 +12,7 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -57,25 +58,48 @@ ACharacterBase::ACharacterBase()
 	bIsAiming = false;
 }
 
+
 // Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// spawn weapon using StartingWeaponClass
-	CurrentWeapon = GetWorld()->SpawnActor<AWeaponBase>(StartingWeaponClass);
+	// HasAuthority does not mean you are server.  It means you have authority over this actor
+	if (HasAuthority())
+	{
+		// spawn weapon using StartingWeaponClass
+		CurrentWeapon = GetWorld()->SpawnActor<AWeaponBase>(StartingWeaponClass);
+		if (CurrentWeapon)
+		{
+			WeaponArray.Add(CurrentWeapon);
+			OnRep_AttachWeapon(); // so it attaches on the server as well
+		}
+	}
+}
+
+void ACharacterBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ACharacterBase, CurrentWeapon);
+}
+
+void ACharacterBase::OnRep_AttachWeapon()
+{
 	if (CurrentWeapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ATTACHING WEAPON TO SOCKET"));
-		// attach spawned weapon to socket (GripPoint: probably need to create own socket)
-		CurrentWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("GripPoint"));
-		WeaponArray.Add(CurrentWeapon);
+		if (IsLocallyControlled()) 
+		{
+			// attach spawned weapon to socket called GripPoint on First Person Arms
+			CurrentWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+		}
+		else
+		{
+			// attach gun to third person mesh
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));
+		}
 	}
-
-
-	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	//FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 }
+
 
 
 // Called to bind functionality to input

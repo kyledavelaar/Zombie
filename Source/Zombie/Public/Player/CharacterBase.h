@@ -42,7 +42,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
 		TSubclassOf<class AWeaponBase> StartingWeaponClass;
 
+	UPROPERTY(ReplicatedUsing = OnRep_AttachWeapon)
 	class AWeaponBase* CurrentWeapon;
+	UFUNCTION()
+		void OnRep_AttachWeapon();
+
 	int32 WeaponIndex;
 	TArray<AWeaponBase*> WeaponArray; 
 	

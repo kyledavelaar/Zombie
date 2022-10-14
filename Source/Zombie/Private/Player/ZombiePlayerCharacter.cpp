@@ -9,6 +9,7 @@
 #include "Engine/World.h"
 #include "Camera/CameraComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Animation/AnimInstance.h"
 
 AZombiePlayerCharacter::AZombiePlayerCharacter()
 {
@@ -54,14 +55,14 @@ void AZombiePlayerCharacter::SetInteractableObject()
 		// started looking at interactable for the first time
 		UE_LOG(LogTemp, Warning, TEXT("started looking at interactable for the first time: %s"), *HitResult.GetActor()->GetName());
 		Interactable = Temp;
-		OnInteractChanged.Broadcast(Interactable->GetUIMessage());
+		NewInteractMessage.Broadcast(Interactable->GetUIMessage());
 	}
 	else if (Interactable && Temp == nullptr)
 	{
 		// stopped looking at interactable
 		UE_LOG(LogTemp, Warning, TEXT("stopped looking at interactable"));
 		Interactable = nullptr;
-		OnInteractChanged.Broadcast(FString());
+		NewInteractMessage.Broadcast(FString());
 	}
 }
 
@@ -102,13 +103,21 @@ void AZombiePlayerCharacter::OnFire()
 {
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->Fire();
+		CurrentWeapon->Fire(this);
+		if (UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance())
+		{
+			if (UAnimMontage* FireMontage = CurrentWeapon->GetFireAnimMontage())
+			{
+				AnimInstance->Montage_Play(FireMontage);
+			}
+		}
 	}
 }
 
 void AZombiePlayerCharacter::IncrementPoints(uint16 Value)
 {
 	Points += Value;
+	NewPoints.Broadcast(Points);
 	UE_LOG(LogTemp, Warning, TEXT("POINTS: %d"), Points);
 }
 
@@ -121,7 +130,13 @@ bool AZombiePlayerCharacter::DecrementPoints(uint16 Value)
 	else
 	{
 		Points -= Value;
+		NewPoints.Broadcast(Points);
 		UE_LOG(LogTemp, Warning, TEXT("POINTS: %d"), Points);
 		return true;
 	}
+}
+
+int32 AZombiePlayerCharacter::GetPoints()
+{
+	return Points;
 }

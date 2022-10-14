@@ -6,7 +6,8 @@
 #include "Player/CharacterBase.h"
 #include "ZombiePlayerCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInteractChanged, const FString&, OnInteractChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInteractChanged, const FString&, NewInteractMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPointsChanged, int32, NewPoints);
 
 UCLASS()
 class ZOMBIE_API AZombiePlayerCharacter : public ACharacterBase
@@ -17,7 +18,10 @@ public:
 
 protected:
 	UPROPERTY(BlueprintAssignable)
-		FInteractChanged OnInteractChanged;
+		FInteractChanged NewInteractMessage;
+
+	UPROPERTY(BlueprintAssignable)
+		FPointsChanged NewPoints;
 
 	FTimerHandle TInteractTimerHandle;
 	class AInteractableBase* Interactable;
@@ -42,6 +46,9 @@ protected:
 public:
 	void IncrementPoints(uint16 Value);
 	bool DecrementPoints(uint16 Value);
+
+	UFUNCTION(BlueprintCallable)
+		int32 GetPoints();
 	
 protected:
 	virtual void BeginPlay() override;
