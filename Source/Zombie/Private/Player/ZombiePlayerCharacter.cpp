@@ -10,12 +10,12 @@
 #include "Camera/CameraComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
+#include "Net/UnrealNetwork.h"
 
 AZombiePlayerCharacter::AZombiePlayerCharacter()
 {
 	Interactable = nullptr;
 	InteractionRange = 250.0f;
-	Points = 500;
 }
 
 void AZombiePlayerCharacter::BeginPlay()
@@ -27,6 +27,11 @@ void AZombiePlayerCharacter::BeginPlay()
 
 	GetWorld()->GetTimerManager().SetTimer(TInteractTimerHandle, this, &AZombiePlayerCharacter::SetInteractableObject, 0.2f, true);
 }
+
+//void AZombiePlayerCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+//{
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//}
 
 void AZombiePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -114,29 +119,3 @@ void AZombiePlayerCharacter::OnFire()
 	}
 }
 
-void AZombiePlayerCharacter::IncrementPoints(uint16 Value)
-{
-	Points += Value;
-	NewPoints.Broadcast(Points);
-	UE_LOG(LogTemp, Warning, TEXT("POINTS: %d"), Points);
-}
-
-bool AZombiePlayerCharacter::DecrementPoints(uint16 Value)
-{
-	if ((Points - Value) < 0)
-	{
-		return false;
-	}
-	else
-	{
-		Points -= Value;
-		NewPoints.Broadcast(Points);
-		UE_LOG(LogTemp, Warning, TEXT("POINTS: %d"), Points);
-		return true;
-	}
-}
-
-int32 AZombiePlayerCharacter::GetPoints()
-{
-	return Points;
-}

@@ -67,8 +67,11 @@ void ACharacterBase::BeginPlay()
 	// HasAuthority does not mean you are server.  It means you have authority over this actor
 	if (HasAuthority())
 	{
-		// spawn weapon using StartingWeaponClass
-		CurrentWeapon = GetWorld()->SpawnActor<AWeaponBase>(StartingWeaponClass);
+
+		FActorSpawnParameters SpawnParameters;
+		// To RPC the gun so server and client can call the fire gun method,
+		SpawnParameters.Owner = this;
+		CurrentWeapon = GetWorld()->SpawnActor<AWeaponBase>(StartingWeaponClass, SpawnParameters);
 		if (CurrentWeapon)
 		{
 			WeaponArray.Add(CurrentWeapon);

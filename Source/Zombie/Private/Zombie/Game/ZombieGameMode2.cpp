@@ -110,6 +110,7 @@ void AZombieGameMode2::CalculateZombieCount()
 		uint16 RoundNumber = ZombieGameState->GetRoundNumber();
 		// TODO: do calculation here
 		ZombiesRemaining = 5;
+		ZombieGameState->SetTotalZombiesRemaining(ZombiesRemaining);
 	}
 	else
 	{
@@ -152,6 +153,18 @@ void AZombieGameMode2::NewZoneActive(uint8 ZoneNumber)
 			ActiveZombieSpawnPoints.Add(ZombieSpawnPoint);
 			ZombieSpawnPoint->Activate();
 			ZombieSpawnPoints.RemoveAt(x);
+		}
+	}
+}
+
+void AZombieGameMode2::ZombieKilled()
+{
+	if (ZombieGameState)
+	{
+		ZombieGameState->ZombieKilled();
+		if (ZombieGameState->GetTotalZombiesRemaining() == 0)
+		{
+			// start new round
 		}
 	}
 }

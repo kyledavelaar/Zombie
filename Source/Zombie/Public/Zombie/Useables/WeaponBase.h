@@ -47,6 +47,12 @@ protected:
 	virtual void BeginPlay() override;
 
 	TArray<FHitResult> PerformLineTrace(class AZombiePlayerCharacter* ShootingPlayer);
+	TArray<FHitResult> PerformLineTrace(FVector MuzzleLocation, FRotator MuzzleRotation);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+		void Server_Fire(const TArray<FHitResult>& HitResults);
+	bool Server_Fire_Validate(const TArray<FHitResult>& HitResults);
+	virtual void Server_Fire_Implementation(const TArray<FHitResult>& HitResults);
 
 public:
 	// virtual void Fire() = 0; is a pure virtual function, no definition required in WeaponBase.cpp file

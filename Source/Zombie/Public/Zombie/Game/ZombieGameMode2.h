@@ -47,4 +47,5 @@ protected:
 
 public:
 	void NewZoneActive(uint8 ZoneNumber);
+	void ZombieKilled();
 };

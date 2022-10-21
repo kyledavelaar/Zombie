@@ -59,6 +59,32 @@ TArray<FHitResult> AWeaponBase::PerformLineTrace(AZombiePlayerCharacter* Shootin
 	return HitResults;
 }
 
+TArray<FHitResult> AWeaponBase::PerformLineTrace(FVector MuzzleLocation, FRotator MuzzleRotation)
+{
+	FVector End = MuzzleLocation + MuzzleRotation.Vector() * 5000.0f;
+	TArray<FHitResult> HitResults;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	if (GetOwner())
+	{
+		CollisionParams.AddIgnoredActor(GetOwner());
+	}
+	FCollisionResponseParams CollisionResponse;
+
+	GetWorld()->LineTraceMultiByChannel(OUT HitResults, MuzzleLocation, End, ECollisionChannel::ECC_GameTraceChannel2, CollisionParams, CollisionResponse);
+	DrawDebugLine(GetWorld(), MuzzleLocation, End, FColor::Red, false, 2.0f, 0, 3.0f);
+	return HitResults;
+}
+
+bool AWeaponBase::Server_Fire_Validate(const TArray<FHitResult>& HitResults)
+{
+	return true;
+}
+
+void AWeaponBase::Server_Fire_Implementation(const TArray<FHitResult>& HitResults)
+{
+}
+
 TArray<FHitResult> AWeaponBase::Fire(AZombiePlayerCharacter* ShootingPlayer)
 {
 	return TArray<FHitResult>();

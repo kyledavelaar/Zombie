@@ -4,6 +4,7 @@
 #include "Zombie/Useables/Barricade.h"
 #include "Zombie/Game/ZombieGameMode2.h"
 #include "Zombie/Public/Player/ZombiePlayerCharacter.h"
+#include "Zombie/Public/Player/ZombiePlayerState.h"
 
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -50,16 +51,25 @@ void ABarricade::OnRep_BarricadeUsed()
 
 void ABarricade::Use(AZombiePlayerCharacter* Player)
 {
-	if (HasAuthority() && !bIsUsed && Player && Player->DecrementPoints(Cost))
+	if (HasAuthority() && !bIsUsed && Player)
 	{
-		// play animation to move barricade
-		UE_LOG(LogTemp, Warning, TEXT("BARRICADE USE FUNCTION FOR %s"), *GetName());
-		//SetActorEnableCollision(false);
-		bIsUsed = true;
-		OnRep_BarricadeUsed();
-		if (AZombieGameMode2* GM = GetWorld()->GetAuthGameMode<AZombieGameMode2>())
+		if (AZombiePlayerState* PState = Player->GetPlayerState<AZombiePlayerState>())
 		{
-			GM->NewZoneActive(AccessZone);
+			if (!PState->DecrementPoints(Cost))
+				return;
+			
+			// play animation to move barricade
+			UE_LOG(LogTemp, Warning, TEXT("BARRICADE USE FUNCTION FOR %s"), *GetName());
+			//SetActorEnableCollision(false);
+			bIsUsed = true;
+			OnRep_BarricadeUsed();
+
+			if (AZombieGameMode2* GM = GetWorld()->GetAuthGameMode<AZombieGameMode2>())
+			{
+				GM->NewZoneActive(AccessZone);
+			}
+
+			
 		}
 	}
 }

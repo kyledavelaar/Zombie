@@ -17,6 +17,10 @@ class ZOMBIE_API AWeapon1911 : public AWeaponBase
 public:
 	AWeapon1911();
 
+protected:
+	virtual void Server_Fire_Implementation(const TArray<FHitResult>& HitResults) override;
+
+public:
 	virtual TArray<FHitResult> Fire(class AZombiePlayerCharacter* ShootingPlayer) override;
 	virtual void Reload() override;
 	

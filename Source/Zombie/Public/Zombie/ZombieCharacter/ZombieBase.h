@@ -18,7 +18,24 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	uint8 GetHitPart(FString BoneName);
+	uint8 GetPointsForHit(uint8 HitPart);
+	void DecrementHealth(int16 Damage);
+	void Die();
+
+
+protected:
+	int16 Health;
+
+	UPROPERTY(EditDefaultsOnly)
+		float CleanupDelay;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Die, EditAnywhere)
+		bool bIsDead;
+	UFUNCTION()
+		void OnRep_Die();
+	void OnCleanup();
 
 public:
-	void Hit(class AZombiePlayerCharacter* Player);
+	void Hit(class AZombiePlayerCharacter* Player, FHitResult HitResult);
 };
