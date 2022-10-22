@@ -56,9 +56,10 @@ void AZombieGameMode2::BeginPlay()
 		}
 	
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Zombie Spawn Count %d"), ZombieSpawnPoints.Num());
 
-	GetWorld()->GetTimerManager().SetTimer(TZombieSpawnHandle, this, &AZombieGameMode2::SpawnZombie, 2.0f, true);
+	GetWorld()->GetTimerManager().SetTimer(TZombieSpawnHandle, this, &AZombieGameMode2::SpawnZombie, 1.0f, true);
+	GetWorld()->GetTimerManager().PauseTimer(TZombieSpawnHandle);
+	CalculateZombieCount();
 }
 
 void AZombieGameMode2::SetSpawnPoints()
@@ -103,18 +104,20 @@ void AZombieGameMode2::PostLogin(APlayerController* NewPlayer)
 	}
 }
 
-void AZombieGameMode2::CalculateZombieCount()
+void AZombieGameMode2::NewZoneActive(uint8 ZoneNumber)
 {
-	if (ZombieGameState)
+	UE_LOG(LogTemp, Warning, TEXT("NEW ZONE SET, %d"), ZoneNumber);
+
+	for (int16 x = ZombieSpawnPoints.Num() - 1; x >= 0; --x)
 	{
-		uint16 RoundNumber = ZombieGameState->GetRoundNumber();
-		// TODO: do calculation here
-		ZombiesRemaining = 5;
-		ZombieGameState->SetTotalZombiesRemaining(ZombiesRemaining);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("no game state"));
+		AZombieSpawnPoint* ZombieSpawnPoint = ZombieSpawnPoints[x];
+
+		if (ZombieSpawnPoint && ZoneNumber == ZombieSpawnPoint->GetZone() && !ZombieSpawnPoint->IsActive())
+		{
+			ActiveZombieSpawnPoints.Add(ZombieSpawnPoint);
+			ZombieSpawnPoint->Activate();
+			ZombieSpawnPoints.RemoveAt(x);
+		}
 	}
 }
 
@@ -140,22 +143,37 @@ void AZombieGameMode2::SpawnZombie()
 	}
 }
 
-void AZombieGameMode2::NewZoneActive(uint8 ZoneNumber)
+void AZombieGameMode2::CalculateZombieCount()
 {
-	UE_LOG(LogTemp, Warning, TEXT("NEW ZONE SET, %d"), ZoneNumber);
-
-	for (int16 x = ZombieSpawnPoints.Num() - 1; x >= 0; --x)
+	if (ZombieGameState)
 	{
-		AZombieSpawnPoint* ZombieSpawnPoint = ZombieSpawnPoints[x];
+		uint16 RoundNumber = ZombieGameState->GetRoundNumber();
+		uint8 PlayerCount = ZombieGameState->PlayerArray.Num();
+		uint8 MaxZombiesOnMapAtOnce = 24;
+		if (PlayerCount > 1)
+			MaxZombiesOnMapAtOnce += PlayerCount * 6;
 
-		if (ZombieSpawnPoint && ZoneNumber == ZombieSpawnPoint->GetZone() && !ZombieSpawnPoint->IsActive())
+		if (RoundNumber > 0 && RoundNumber <= 5)
 		{
-			ActiveZombieSpawnPoints.Add(ZombieSpawnPoint);
-			ZombieSpawnPoint->Activate();
-			ZombieSpawnPoints.RemoveAt(x);
+			UE_LOG(LogTemp, Warning, TEXT("Round 1 - 5"));
+			ZombiesRemaining = FMath::FloorToInt((RoundNumber * 0.2f) * MaxZombiesOnMapAtOnce);
+			UE_LOG(LogTemp, Warning, TEXT("Zombies Remaining, %d"), ZombiesRemaining);
 		}
+		else
+		{
+			ZombiesRemaining = FMath::FloorToInt(RoundNumber * 0.15f * MaxZombiesOnMapAtOnce);
+		}
+
+
+		ZombieGameState->SetTotalZombiesRemaining(ZombiesRemaining);
+		GetWorld()->GetTimerManager().UnPauseTimer(TZombieSpawnHandle);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("no game state"));
 	}
 }
+
 
 void AZombieGameMode2::ZombieKilled()
 {
@@ -165,6 +183,9 @@ void AZombieGameMode2::ZombieKilled()
 		if (ZombieGameState->GetTotalZombiesRemaining() == 0)
 		{
 			// start new round
+			ZombieGameState->IncrementRoundNumber();
+			FTimerHandle TempHandle;
+			GetWorld()->GetTimerManager().SetTimer(TempHandle, this, &AZombieGameMode2::CalculateZombieCount, 5.0f, false);
 		}
 	}
 }

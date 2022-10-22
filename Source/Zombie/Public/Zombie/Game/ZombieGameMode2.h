@@ -33,7 +33,7 @@ protected:
 
 	FTimerHandle TZombieSpawnHandle;
 
-	uint16 ZombiesRemaining;
+	uint32 ZombiesRemaining;
 
 protected:
 	void CalculateZombieCount();
