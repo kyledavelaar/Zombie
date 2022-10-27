@@ -103,6 +103,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		bool GetIsAiming();
 
+	UFUNCTION(BlueprintCallable)
+	class AWeaponBase* GetCurrentWeapon();
+
 public:
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }

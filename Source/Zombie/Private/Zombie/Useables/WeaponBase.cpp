@@ -17,7 +17,6 @@ AWeaponBase::AWeaponBase()
 	SetReplicates(true);
 
 	WeaponName = "Default";
-	BaseDamage = 100;
 	WeaponMaxAmmo = 255;
 	MagazineMaxAmmo = 30;
 	CurrentTotalAmmo = WeaponMaxAmmo;
@@ -94,6 +93,11 @@ void AWeaponBase::Reload()
 {
 }
 
+FWeaponDamage AWeaponBase::GetWeaponDamage()
+{
+	return WeaponDamage;
+}
+
 TArray<int32> AWeaponBase::GetCurrentAmmo()
 {
 	return { CurrentMagazineAmmo, CurrentTotalAmmo };
@@ -103,4 +107,3 @@ UAnimMontage* AWeaponBase::GetFireAnimMontage()
 {
 	return FPSArmsFireMontage;
 }
-

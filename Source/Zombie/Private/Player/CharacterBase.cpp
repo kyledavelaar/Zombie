@@ -217,3 +217,8 @@ bool ACharacterBase::GetIsAiming()
 {
 	return bIsAiming;
 }
+
+AWeaponBase* ACharacterBase::GetCurrentWeapon()
+{
+	return CurrentWeapon;
+}

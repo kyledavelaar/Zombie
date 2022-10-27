@@ -6,6 +6,40 @@
 #include "GameFramework/Actor.h"
 #include "WeaponBase.generated.h"
 
+UENUM(BlueprintType)
+enum EHitLocation
+{
+	None UMETA(DisplayName = "None"),
+	Head UMETA(DisplayName, "Head"),
+	Chest UMETA(DisplayName = "Chest"),
+	Torso UMETA(DisplayName, "Torso")
+};
+
+USTRUCT(BlueprintType)
+struct FWeaponDamage
+{
+	GENERATED_BODY();
+public:
+	UPROPERTY(EditDefaultsOnly)
+		float BaseDamage = 20.0f;
+	UPROPERTY(EditDefaultsOnly)
+		float HeadMultiplier = 3.5f;
+	UPROPERTY(EditDefaultsOnly)
+		float ChestMultiplier = 1.25f;
+	UPROPERTY(EditDefaultsOnly)
+		float TorsoMultiplier = 1.1f;
+	float GetDamage(EHitLocation HitLocation)
+	{
+		switch (HitLocation)
+		{
+			case Head: return BaseDamage * HeadMultiplier;
+			case Chest: return BaseDamage * ChestMultiplier;
+			case Torso: return BaseDamage * TorsoMultiplier;
+			default: return BaseDamage;
+		}
+	}
+};
+
 UCLASS()
 class ZOMBIE_API AWeaponBase : public AActor
 {
@@ -37,7 +71,7 @@ protected:
 		int32 MagazineMaxAmmo;
 
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
-		int32 BaseDamage;
+		FWeaponDamage WeaponDamage;
 
 	int32 CurrentTotalAmmo;
 	int32 CurrentMagazineAmmo;
@@ -58,6 +92,7 @@ public:
 	// virtual void Fire() = 0; is a pure virtual function, no definition required in WeaponBase.cpp file
 	virtual TArray<FHitResult> Fire(class AZombiePlayerCharacter* ShootingPlayer);
 	virtual void Reload();
+	FWeaponDamage GetWeaponDamage();
 
 	// first element is CurrentMagazineAmmo, second element is CurrentTotalAmmo
 	TArray<int32> GetCurrentAmmo();

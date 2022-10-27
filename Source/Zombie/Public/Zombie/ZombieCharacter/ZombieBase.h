@@ -19,13 +19,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	uint8 GetHitPart(FString BoneName);
-	uint8 GetPointsForHit(uint8 HitPart);
+	uint8 GetPointsForHit(uint8 HitPart, float WeaponDamage);
 	void DecrementHealth(int16 Damage);
 	void Die();
 
 
 protected:
-	int16 Health;
+	UPROPERTY(Replicated)
+		float Health;
 
 	UPROPERTY(EditDefaultsOnly)
 		float CleanupDelay;
@@ -38,4 +39,5 @@ protected:
 
 public:
 	void Hit(class AZombiePlayerCharacter* Player, FHitResult HitResult);
+	
 };

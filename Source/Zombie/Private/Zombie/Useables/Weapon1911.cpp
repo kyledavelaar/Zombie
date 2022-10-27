@@ -10,7 +10,6 @@
 AWeapon1911::AWeapon1911()
 {
 	WeaponName = "1911";
-	BaseDamage = 100;
 	WeaponMaxAmmo = 98;
 	MagazineMaxAmmo = 7;
 	CurrentTotalAmmo = WeaponMaxAmmo;
