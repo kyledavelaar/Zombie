@@ -9,10 +9,10 @@
 UENUM(BlueprintType)
 enum EHitLocation
 {
-	None UMETA(DisplayName = "None"),
-	Head UMETA(DisplayName, "Head"),
-	Chest UMETA(DisplayName = "Chest"),
-	Torso UMETA(DisplayName, "Torso")
+	None UMETA(Displayname = "None"),
+	Head UMETA(Displayname, "Head"),
+	Chest UMETA(Displayname = "Chest"),
+	Torso UMETA(Displayname, "Torso")
 };
 
 USTRUCT(BlueprintType)
@@ -40,6 +40,13 @@ public:
 	}
 };
 
+UENUM(BlueprintType)
+enum EWeaponID
+{
+	Colt1911 UMETA(Displayname, "1911"),
+	M1Carbine UMETA(Displayname, "M1Carbine")
+};
+
 UCLASS()
 class ZOMBIE_API AWeaponBase : public AActor
 {
@@ -51,6 +58,9 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
 		class USkeletalMeshComponent* WeaponMesh;
+
+	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
+		TEnumAsByte<EWeaponID> WeaponID;
 
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
 		class UAnimationAsset* FireAnimation;
@@ -73,8 +83,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "ZombieSettings")
 		FWeaponDamage WeaponDamage;
 
-	int32 CurrentTotalAmmo;
-	int32 CurrentMagazineAmmo;
+	UPROPERTY(Replicated)
+		int32 CurrentTotalAmmo;
+	UPROPERTY(Replicated)
+		int32 CurrentMagazineAmmo;
 
 protected:
 	// Called when the game starts or when spawned
@@ -90,7 +102,7 @@ protected:
 
 public:
 	// virtual void Fire() = 0; is a pure virtual function, no definition required in WeaponBase.cpp file
-	virtual TArray<FHitResult> Fire(class AZombiePlayerCharacter* ShootingPlayer);
+	virtual bool Fire(class AZombiePlayerCharacter* ShootingPlayer);
 	virtual void Reload();
 	FWeaponDamage GetWeaponDamage();
 
@@ -98,4 +110,7 @@ public:
 	TArray<int32> GetCurrentAmmo();
 
 	class UAnimMontage* GetFireAnimMontage();
+
+	UFUNCTION(BlueprintCallable)
+	TEnumAsByte<EWeaponID> GetWeaponID();
 };

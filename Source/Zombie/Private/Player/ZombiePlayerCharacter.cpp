@@ -108,13 +108,26 @@ void AZombiePlayerCharacter::OnFire()
 {
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->Fire(this);
-		if (UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance())
+		if (CurrentWeapon->Fire(this))
 		{
-			if (UAnimMontage* FireMontage = CurrentWeapon->GetFireAnimMontage())
+			if (UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance())
 			{
-				AnimInstance->Montage_Play(FireMontage);
+				if (UAnimMontage* FireMontage = CurrentWeapon->GetFireAnimMontage())
+				{
+					AnimInstance->Montage_Play(FireMontage);
+
+					// TODO: change this to reload 
+					if (bIsAiming)
+					{
+						AnimInstance->Montage_JumpToSection(FName("FireADS"), FireMontage);
+					}
+					else
+					{
+						AnimInstance->Montage_JumpToSection(FName("Reload"), FireMontage);
+					}
+				}
 			}
+
 		}
 	}
 }

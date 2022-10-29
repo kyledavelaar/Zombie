@@ -8,6 +8,7 @@
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "Animation/AnimInstance.h"
+#include "Net/UnrealNetwork.h"
 
 AWeaponBase::AWeaponBase()
 {
@@ -29,6 +30,16 @@ void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AWeaponBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// to prevent cheating so someone can't have unlimited ammo
+	// all other players don't need to know about someone elses ammo so don't need to replicate/broadcast to every player
+	DOREPLIFETIME_CONDITION(AWeaponBase, CurrentTotalAmmo, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(AWeaponBase, CurrentMagazineAmmo, COND_OwnerOnly);
 }
 
 TArray<FHitResult> AWeaponBase::PerformLineTrace(AZombiePlayerCharacter* ShootingPlayer)
@@ -84,9 +95,11 @@ void AWeaponBase::Server_Fire_Implementation(const TArray<FHitResult>& HitResult
 {
 }
 
-TArray<FHitResult> AWeaponBase::Fire(AZombiePlayerCharacter* ShootingPlayer)
+bool AWeaponBase::Fire(AZombiePlayerCharacter* ShootingPlayer)
 {
-	return TArray<FHitResult>();
+	CurrentMagazineAmmo--;
+	UE_LOG(LogTemp, Warning, TEXT("Ammo: %d"), CurrentMagazineAmmo);
+	return true;
 }
 
 void AWeaponBase::Reload()
@@ -106,4 +119,9 @@ TArray<int32> AWeaponBase::GetCurrentAmmo()
 UAnimMontage* AWeaponBase::GetFireAnimMontage()
 {
 	return FPSArmsFireMontage;
+}
+
+TEnumAsByte<EWeaponID> AWeaponBase::GetWeaponID()
+{
+	return WeaponID;
 }

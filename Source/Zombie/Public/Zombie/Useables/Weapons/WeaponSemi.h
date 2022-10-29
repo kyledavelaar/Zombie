@@ -4,24 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Zombie/Useables/WeaponBase.h"
-#include "Weapon1911.generated.h"
+#include "WeaponSemi.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
-class ZOMBIE_API AWeapon1911 : public AWeaponBase
+class ZOMBIE_API AWeaponSemi : public AWeaponBase
 {
 	GENERATED_BODY()
-
 public:
-	AWeapon1911();
+	AWeaponSemi();
 
 protected:
 	virtual void Server_Fire_Implementation(const TArray<FHitResult>& HitResults) override;
 
 public:
-	virtual TArray<FHitResult> Fire(class AZombiePlayerCharacter* ShootingPlayer) override;
+	virtual bool Fire(class AZombiePlayerCharacter* ShootingPlayer) override;
 	virtual void Reload() override;
 	
 };
