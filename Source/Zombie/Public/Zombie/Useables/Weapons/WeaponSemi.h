@@ -19,6 +19,6 @@ protected:
 
 public:
 	virtual bool Fire(class AZombiePlayerCharacter* ShootingPlayer) override;
-	virtual void Reload() override;
+	virtual bool Reload() override;
 	
 };

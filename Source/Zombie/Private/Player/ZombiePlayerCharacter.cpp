@@ -39,6 +39,8 @@ void AZombiePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AZombiePlayerCharacter::Interact);
+
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AZombiePlayerCharacter::OnReload);
 }
 
 void AZombiePlayerCharacter::SetInteractableObject()
@@ -115,19 +117,34 @@ void AZombiePlayerCharacter::OnFire()
 				if (UAnimMontage* FireMontage = CurrentWeapon->GetFireAnimMontage())
 				{
 					AnimInstance->Montage_Play(FireMontage);
-
-					// TODO: change this to reload 
-					if (bIsAiming)
+					AnimInstance->Montage_JumpToSection(FName("FireADS"), FireMontage);
+					
+					/*if (bIsAiming)
 					{
 						AnimInstance->Montage_JumpToSection(FName("FireADS"), FireMontage);
 					}
 					else
 					{
 						AnimInstance->Montage_JumpToSection(FName("Reload"), FireMontage);
-					}
+					}*/
 				}
 			}
 
+		}
+	}
+}
+
+void AZombiePlayerCharacter::OnReload()
+{
+	if (CurrentWeapon && CurrentWeapon->Reload())
+	{
+		if (UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance())
+		{
+			if (UAnimMontage* FireMontage = CurrentWeapon->GetFireAnimMontage())
+			{
+				AnimInstance->Montage_Play(FireMontage);
+				AnimInstance->Montage_JumpToSection(FName("Reload"), FireMontage);
+			}
 		}
 	}
 }

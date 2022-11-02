@@ -93,17 +93,22 @@ bool AWeaponBase::Server_Fire_Validate(const TArray<FHitResult>& HitResults)
 
 void AWeaponBase::Server_Fire_Implementation(const TArray<FHitResult>& HitResults)
 {
+	if (CurrentMagazineAmmo > 0)
+		CurrentMagazineAmmo--;
+	UE_LOG(LogTemp, Warning, TEXT("ServerAmmo: %d"), CurrentMagazineAmmo);
 }
 
 bool AWeaponBase::Fire(AZombiePlayerCharacter* ShootingPlayer)
 {
-	CurrentMagazineAmmo--;
-	UE_LOG(LogTemp, Warning, TEXT("Ammo: %d"), CurrentMagazineAmmo);
+	if (CurrentMagazineAmmo > 0)
+		CurrentMagazineAmmo--;
+	UE_LOG(LogTemp, Warning, TEXT("ClientAmmo: %d"), CurrentMagazineAmmo);
 	return true;
 }
 
-void AWeaponBase::Reload()
+bool AWeaponBase::Reload()
 {
+	return true;
 }
 
 FWeaponDamage AWeaponBase::GetWeaponDamage()

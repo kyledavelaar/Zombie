@@ -35,6 +35,7 @@ protected:
 	void Server_Interact_Implementation(class AInteractableBase* InteractingObject);
 
 	virtual void OnFire() override;
+	void OnReload();
 
 protected:
 	virtual void BeginPlay() override;

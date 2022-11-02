@@ -103,7 +103,7 @@ protected:
 public:
 	// virtual void Fire() = 0; is a pure virtual function, no definition required in WeaponBase.cpp file
 	virtual bool Fire(class AZombiePlayerCharacter* ShootingPlayer);
-	virtual void Reload();
+	virtual bool Reload();
 	FWeaponDamage GetWeaponDamage();
 
 	// first element is CurrentMagazineAmmo, second element is CurrentTotalAmmo
