@@ -118,15 +118,6 @@ void AZombiePlayerCharacter::OnFire()
 				{
 					AnimInstance->Montage_Play(FireMontage);
 					AnimInstance->Montage_JumpToSection(FName("FireADS"), FireMontage);
-					
-					/*if (bIsAiming)
-					{
-						AnimInstance->Montage_JumpToSection(FName("FireADS"), FireMontage);
-					}
-					else
-					{
-						AnimInstance->Montage_JumpToSection(FName("Reload"), FireMontage);
-					}*/
 				}
 			}
 

@@ -90,7 +90,7 @@ void ACharacterBase::OnRep_AttachWeapon()
 {
 	if (CurrentWeapon)
 	{
-		if (IsLocallyControlled()) 
+		if (true || IsLocallyControlled())  // TODO: remove true after testing
 		{
 			// attach spawned weapon to socket called GripPoint on First Person Arms
 			CurrentWeapon->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("GripPoint"));

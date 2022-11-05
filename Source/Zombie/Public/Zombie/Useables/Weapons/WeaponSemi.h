@@ -15,10 +15,12 @@ public:
 	AWeaponSemi();
 
 protected:
+	virtual void BeginPlay() override;
 	virtual void Server_Fire_Implementation(const TArray<FHitResult>& HitResults) override;
+	virtual void Multi_Fire_Implementation(const FHitResult& HitResult) override;
 
 public:
 	virtual bool Fire(class AZombiePlayerCharacter* ShootingPlayer) override;
-	virtual bool Reload() override;
+	//virtual bool Reload() override;
 	
 };

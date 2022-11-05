@@ -13,23 +13,31 @@ AWeaponSemi::AWeaponSemi()
 	WeaponName = "Default Name";
 	WeaponMaxAmmo = 98;
 	MagazineMaxAmmo = 7;
+}
+
+
+void AWeaponSemi::BeginPlay()
+{
+	Super::BeginPlay();
+	// can't be set in constructor or won't be able to change values in BP
 	CurrentTotalAmmo = WeaponMaxAmmo;
 	CurrentMagazineAmmo = MagazineMaxAmmo;
 }
 
 
+
 // server gets message from client that client fired
 void AWeaponSemi::Server_Fire_Implementation(const TArray<FHitResult>& HitResults)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Server fire function"));
-	UE_LOG(LogTemp, Warning, TEXT("AmmoReplicated: %d"), CurrentMagazineAmmo);
+	//UE_LOG(LogTemp, Warning, TEXT("Server fire function"));
+	//UE_LOG(LogTemp, Warning, TEXT("AmmoReplicated: %d"), CurrentMagazineAmmo);
 	if (CurrentMagazineAmmo > 0)
 	{
 		Super::Server_Fire_Implementation(HitResults);
-		if (FireAnimation)
+		/*if (FireAnimation)
 		{
 			WeaponMesh->PlayAnimation(FireAnimation, false);
-		}
+		}*/
 
 		if (HitResults.Num() > 0)
 		{
@@ -42,13 +50,27 @@ void AWeaponSemi::Server_Fire_Implementation(const TArray<FHitResult>& HitResult
 						if (AZombiePlayerCharacter* Player = Cast<AZombiePlayerCharacter>(GetOwner()))
 							Zombie->Hit(Player, HitResult);
 					}
-					UE_LOG(LogTemp, Warning, TEXT("Actor Hit: %s"), *HitActor->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("Actor Hit: %s"), *HitActor->GetName());
 				}
 			}
+			Multi_Fire(HitResults[0]);
 		}
 	}
 }
 
+// server sending message to all the clients
+void AWeaponSemi::Multi_Fire_Implementation(const FHitResult& HitResult)
+{
+	if (APawn* Pawn = Cast<APawn>(GetOwner())) // so doesn't play twice for client who reloaded
+	{
+		if (!Pawn->IsLocallyControlled() && FireAnimation)
+		{
+			WeaponMesh->PlayAnimation(FireAnimation, false);
+		}
+	}
+}
+
+// client calls fire 
 bool AWeaponSemi::Fire(AZombiePlayerCharacter* ShootingPlayer)
 {
 	if (CurrentMagazineAmmo > 0)
@@ -78,35 +100,24 @@ bool AWeaponSemi::Fire(AZombiePlayerCharacter* ShootingPlayer)
 					UE_LOG(LogTemp, Warning, TEXT("Actor Hit: %s"), *HitActor->GetName());
 				}
 			}
+			if (GetWorld()->IsServer())
+			{
+				Multi_Fire(HitResults[0]); // send to all server's clients
+			}
+			else
+			{
+				Server_Fire(HitResults); // sends to server the client's hit result, and then server calls multi-cast.  This way clients never deal with each other but only with the server
+			}
+			return true;
 		}
-		if (!GetWorld()->IsServer())
-		{
-			// send client hit result to server
-			Server_Fire(HitResults);
-		}
-		return true;
 	}
 
 	return false;
 
 }
 
-bool AWeaponSemi::Reload()
-{
-	if (CurrentTotalAmmo > 0 && CurrentMagazineAmmo != MagazineMaxAmmo)
-	{
-		if (ReloadAnimation)
-		{
-			WeaponMesh->PlayAnimation(FireAnimation, false);
-		}
-		int Difference = MagazineMaxAmmo - CurrentMagazineAmmo;
-		CurrentTotalAmmo -= Difference;
-		CurrentMagazineAmmo = MagazineMaxAmmo;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
+//bool AWeaponSemi::Reload()
+//{
+//	return Super::Reload();
+//}
 

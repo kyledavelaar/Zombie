@@ -98,6 +98,16 @@ void AWeaponBase::Server_Fire_Implementation(const TArray<FHitResult>& HitResult
 	UE_LOG(LogTemp, Warning, TEXT("ServerAmmo: %d"), CurrentMagazineAmmo);
 }
 
+bool AWeaponBase::Multi_Fire_Validate(const FHitResult& HitResult)
+{
+	return true;
+}
+
+void AWeaponBase::Multi_Fire_Implementation(const FHitResult& HitResult)
+{
+}
+
+
 bool AWeaponBase::Fire(AZombiePlayerCharacter* ShootingPlayer)
 {
 	if (CurrentMagazineAmmo > 0)
@@ -106,9 +116,75 @@ bool AWeaponBase::Fire(AZombiePlayerCharacter* ShootingPlayer)
 	return true;
 }
 
-bool AWeaponBase::Reload()
+bool AWeaponBase::Server_Reload_Validate()
 {
 	return true;
+}
+
+void AWeaponBase::Server_Reload_Implementation()
+{
+	Reload();  // Reload() now called as the server, which will call multi_reload in that function so no need to call it here
+}
+
+bool AWeaponBase::Multi_Reload_Validate()
+{
+	return true;
+}
+
+// runs on all clients including person who called it
+void AWeaponBase::Multi_Reload_Implementation()
+{
+	if (APawn* Pawn = Cast<APawn>(GetOwner()))
+	{
+		// if you were the client who reloaded don't show animation twice b/c already showed it in Reload()
+		if (!Pawn->IsLocallyControlled() && ReloadAnimation)
+		{
+			WeaponMesh->PlayAnimation(ReloadAnimation, false);
+		}
+	}
+}
+
+// client reloads
+bool AWeaponBase::Reload()
+{
+	if (CurrentTotalAmmo > 0 && CurrentMagazineAmmo != MagazineMaxAmmo)
+	{
+		if (APawn* Pawn = Cast<APawn>(GetOwner()))
+		{
+			// if this client was the one who reloaded
+			if (Pawn->IsLocallyControlled() && ReloadAnimation)
+			{
+				WeaponMesh->PlayAnimation(ReloadAnimation, false);
+			}
+		}
+		//UE_LOG(LogTemp, Warning, TEXT("CurrentTotalAmmo Before: %d"), CurrentTotalAmmo);
+		int Difference = MagazineMaxAmmo - CurrentMagazineAmmo;
+		if (CurrentTotalAmmo - Difference >= 0)
+		{
+			CurrentTotalAmmo -= Difference;
+			CurrentMagazineAmmo = MagazineMaxAmmo;
+		}
+		else
+		{
+			CurrentMagazineAmmo += CurrentTotalAmmo;
+			CurrentTotalAmmo = 0;
+		}
+		//UE_LOG(LogTemp, Warning, TEXT("CurrentTotalAmmo After: %d"), CurrentTotalAmmo);
+
+		if (GetWorld()->IsServer())
+		{
+			Multi_Reload(); // send message to all the clients that someone reloaded
+		}
+		else
+		{
+			Server_Reload(); // send message to server that this client reloaded
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 FWeaponDamage AWeaponBase::GetWeaponDamage()

@@ -100,6 +100,21 @@ protected:
 	bool Server_Fire_Validate(const TArray<FHitResult>& HitResults);
 	virtual void Server_Fire_Implementation(const TArray<FHitResult>& HitResults);
 
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+		void Multi_Fire(const FHitResult& HitResult);
+	bool Multi_Fire_Validate(const FHitResult& HitResult);
+	virtual void Multi_Fire_Implementation(const FHitResult& HitResult);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+		void Server_Reload();
+	bool Server_Reload_Validate();
+	virtual void Server_Reload_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+		void Multi_Reload();
+	bool Multi_Reload_Validate();
+	virtual void Multi_Reload_Implementation();
+
 public:
 	// virtual void Fire() = 0; is a pure virtual function, no definition required in WeaponBase.cpp file
 	virtual bool Fire(class AZombiePlayerCharacter* ShootingPlayer);
