@@ -84,6 +84,7 @@ void ACharacterBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ACharacterBase, CurrentWeapon);
+	DOREPLIFETIME_CONDITION(ACharacterBase, bIsAiming, COND_SkipOwner);
 }
 
 void ACharacterBase::OnRep_AttachWeapon()
@@ -173,14 +174,28 @@ void ACharacterBase::OnFire()
 	//}
 }
 
+bool ACharacterBase::Server_SetAiming_Validate(bool WantsToAim)
+{
+	return true;
+}
+
+void ACharacterBase::Server_SetAiming_Implementation(bool WantsToAim)
+{
+	bIsAiming = WantsToAim;
+}
+
 void ACharacterBase::OnAimingStart()
 {
 	bIsAiming = true;
+	if (!HasAuthority()) // if this is the client, send aiming to server
+		Server_SetAiming(bIsAiming);
 }
 
 void ACharacterBase::OnAimingEnd()
 {
 	bIsAiming = false;
+	if (!HasAuthority()) // if this is the client, send aiming to server
+		Server_SetAiming(bIsAiming);
 }
 
 void ACharacterBase::MoveForward(float Value)

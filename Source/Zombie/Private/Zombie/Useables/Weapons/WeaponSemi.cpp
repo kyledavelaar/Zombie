@@ -61,10 +61,23 @@ void AWeaponSemi::Server_Fire_Implementation(const TArray<FHitResult>& HitResult
 // server sending message to all the clients
 void AWeaponSemi::Multi_Fire_Implementation(const FHitResult& HitResult)
 {
-	if (APawn* Pawn = Cast<APawn>(GetOwner())) // so doesn't play twice for client who reloaded
+	if (AZombiePlayerCharacter* Pawn = Cast<AZombiePlayerCharacter>(GetOwner()))
 	{
+		// if you were the client who reloaded don't show animation twice b/c already showed it in Fire()
 		if (!Pawn->IsLocallyControlled() && FireAnimation)
 		{
+			if (UAnimInstance* AnimInstance = Pawn->GetMesh1P()->GetAnimInstance())
+			{
+				if (FPSArmsFireMontage)
+				{
+					AnimInstance->Montage_Play(FPSArmsFireMontage);
+					if (Pawn->GetIsAiming())
+					{
+						// play aiming animation. vs hipfire but we currently only have ads animation so not using this
+					}
+					AnimInstance->Montage_JumpToSection(FName("FireADS"), FPSArmsFireMontage);
+				}
+			}
 			WeaponMesh->PlayAnimation(FireAnimation, false);
 		}
 	}

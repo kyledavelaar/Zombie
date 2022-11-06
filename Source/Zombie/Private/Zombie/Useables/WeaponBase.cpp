@@ -134,11 +134,20 @@ bool AWeaponBase::Multi_Reload_Validate()
 // runs on all clients including person who called it
 void AWeaponBase::Multi_Reload_Implementation()
 {
-	if (APawn* Pawn = Cast<APawn>(GetOwner()))
+	if (AZombiePlayerCharacter* Pawn = Cast<AZombiePlayerCharacter>(GetOwner()))
 	{
 		// if you were the client who reloaded don't show animation twice b/c already showed it in Reload()
 		if (!Pawn->IsLocallyControlled() && ReloadAnimation)
 		{
+			// same reload logic in ZombiePlayerCharacter but this is needed so other clients and server can see that player's reload
+			if (UAnimInstance* AnimInstance = Pawn->GetMesh1P()->GetAnimInstance())
+			{
+				if (FPSArmsFireMontage)
+				{
+					AnimInstance->Montage_Play(FPSArmsFireMontage);
+					AnimInstance->Montage_JumpToSection(FName("Reload"), FPSArmsFireMontage);
+				}
+			}
 			WeaponMesh->PlayAnimation(ReloadAnimation, false);
 		}
 	}
